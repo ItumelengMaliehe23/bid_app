@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Product;
+use App\User;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +17,37 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    
+        if(request()->has('product_category')){
+            $products = Product::where('product_category', request('product_category'))->paginate(13)->appends('product_category', request('product_category'));
+          }else if(request()->has('search')){
+            $search = request()->get('search');
+            $products = Product::where('product_name', 'like', '%'.$search.'%')->
+            orWhere('product_category', 'like', '%'.$search.'%')->paginate(13);
+          }else{
+            $products = Product::orderBy('created_at','desc')->paginate(15);
+          }
+
+          if(Auth::check()){
+            $user_id = auth()->user()->id;
+            $user = User::find($user_id);
+    
+            return view('welcome', compact('products'))->with('carts', $user->carts);
+         
+        }else{
+       
+    
+          return view('welcome', compact('products'));
+        }
+        
+          
+          
 });
+
+Auth::routes(['verify' => true]);
+
+Route::resource('/profiles','ProfileController');
+Route::resource('/products','ProductController');
+Route::resource('/cart','CartController');
+
+Route::get('/home', 'HomeController@index')->name('home');

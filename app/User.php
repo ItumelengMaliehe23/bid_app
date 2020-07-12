@@ -6,7 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable;
 
@@ -27,6 +27,18 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function profiles(){
+        return $this->hasOne('App\Profile');
+    }
+
+    public function carts(){
+        return $this->hasMany('App\Cart');
+    }
+
+    public function products(){
+        return $this->hasMany('App\Product');
+    }
 
     /**
      * The attributes that should be cast to native types.
